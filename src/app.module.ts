@@ -6,6 +6,7 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MoviesModule } from './movies/movies.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MoviesModule } from './movies/movies.module';
         autoLoadEntities: true,
       }),
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
