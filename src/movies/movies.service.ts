@@ -13,9 +13,13 @@ export class MoviesService {
     private moviesRepository: Repository<Movie>,
   ) {}
 
-  create(createMovieDto: CreateMovieDto) {
+  async create(createMovieDto: CreateMovieDto) {
+    const { imdbID } = createMovieDto;
+    if (await this.moviesRepository.existsBy({ imdbID })) {
+      throw new Error(`Movie with email ${imdbID} already exists.`);
+    }
     const movie = this.moviesRepository.create(createMovieDto);
-    return this.moviesRepository.insert(movie);
+    return this.moviesRepository.save(movie);
   }
 
   findAll() {
