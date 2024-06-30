@@ -30,20 +30,20 @@ export class MoviesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.moviesService.findOne(+id).catch((err) => {
+  findOne(@Param('id') id: number) {
+    return this.moviesService.findOne(id).catch((err) => {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     });
   }
 
   // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
+  // update(@Param('id') id: number, @Body() updateMovieDto: UpdateMovieDto) {
   //   return this.moviesService.update(id, updateMovieDto);
   // }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.moviesService.remove(+id).catch((err) => {
+  remove(@Param('id') id: number) {
+    return this.moviesService.remove(id).catch((err) => {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     });
   }

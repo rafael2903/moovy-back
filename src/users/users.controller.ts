@@ -21,8 +21,8 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const user = await this.usersService.findOneById(+id);
+  async findOne(@Param('id') id: number) {
+    const user = await this.usersService.findOneById(id);
 
     if (user) return user;
     else {
@@ -34,15 +34,15 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto).catch((err) => {
+  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto).catch((err) => {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id).catch((err) => {
+  remove(@Param('id') id: number) {
+    return this.usersService.remove(id).catch((err) => {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     });
   }

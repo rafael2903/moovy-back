@@ -1,7 +1,18 @@
+import { IsNotEmpty, IsNumberString, IsUrl } from 'class-validator';
+
 export class CreateMovieDto {
-  imdbID: string;
-  title: string;
-  year: string;
-  imdbRating: string;
-  poster: string;
+  @IsNotEmpty()
+  imdbID!: string;
+
+  @IsNotEmpty()
+  title!: string;
+
+  @IsNumberString()
+  year!: string;
+
+  @IsNotEmpty()
+  imdbRating!: string;
+
+  @IsUrl()
+  poster!: string;
 }
