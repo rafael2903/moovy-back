@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -18,19 +18,23 @@ export class UsersService {
       throw new Error(`User with email ${email} already exists.`);
     }
     const user = this.usersRepository.create(createUserDto);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userInfo } = await this.usersRepository.save(user);
-    return userInfo;
+    return this.usersRepository.save(user);
   }
 
   findAll() {
     return this.usersRepository.find();
   }
 
-  async findOne(id: number) {
-    const user = await this.usersRepository.findOneBy({ id });
-    if (user) return user;
-    throw new Error(`User with id = ${id} not found.`);
+  private findOneBy(where: FindOptionsWhere<User> | FindOptionsWhere<User>[]) {
+    return this.usersRepository.findOneBy(where);
+  }
+
+  findOneById(id: number) {
+    return this.findOneBy({ id });
+  }
+
+  findOneByEmail(email: string) {
+    return this.findOneBy({ email });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

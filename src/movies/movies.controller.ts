@@ -3,10 +3,10 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   // Patch,
   HttpException,
   HttpStatus,
+  Param,
   Post,
 } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
