@@ -7,8 +7,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PostgresConfigService } from './config/postgres.config.service';
+import { LibraryModule } from './library/library.module';
 import { MoviesModule } from './movies/movies.module';
 import { UsersModule } from './users/users.module';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
 
 @Module({
   imports: [
@@ -17,9 +20,13 @@ import { UsersModule } from './users/users.module';
       inject: [ConfigService],
       useClass: PostgresConfigService,
     }),
+    AutomapperModule.forRoot({
+      strategyInitializer: classes(),
+    }),
     MoviesModule,
     UsersModule,
     AuthModule,
+    LibraryModule,
   ],
   controllers: [AppController],
   providers: [

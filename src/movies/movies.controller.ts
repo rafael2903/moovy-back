@@ -30,10 +30,16 @@ export class MoviesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.moviesService.findOne(id).catch((err) => {
-      throw new HttpException(err.message, HttpStatus.NOT_FOUND);
-    });
+  async findOne(@Param('id') id: number) {
+    const movie = await this.moviesService.findOneById(id);
+
+    if (movie) return movie;
+    else {
+      throw new HttpException(
+        `Movie with id = ${id} not found.`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   // @Patch(':id')
