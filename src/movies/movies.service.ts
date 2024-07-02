@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
-
-import { CreateMovieDto } from './dto/create-movie.dto';
-// import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
-import { GetMovieDto, GetMovieDtoSuccess } from './dto/get-movie.dto';
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { GetMovieResponseDto } from './dto/get-movie-response.dto';
+import { OMDbMovieDto } from './dto/OMDb-movie.dto';
+import { SearchMovieResponseDto } from './dto/search-movie-response.dto';
 import { Movie } from './entities/movie.entity';
 
 @Injectable()
@@ -60,23 +60,73 @@ export class MoviesService {
     throw new Error(`Movie with id = ${id} not found`);
   }
 
-  async importMovieFromOMDb(imdbId: string) {
+  private async fetchOMDbMovieData(imdbId: string) {
+    const fetchMovieObservableResponse =
+      this.httpService.get<GetMovieResponseDto>('/', {
+        params: { i: imdbId },
+      });
+    const { data } = await firstValueFrom(fetchMovieObservableResponse);
+
+    return data;
+  }
+
+  async imporFromOMDb(imdbId: string) {
     const movie = await this.findOneByImdbID(imdbId);
     if (movie) return movie;
 
-    const observableResponse = this.httpService.get<GetMovieDto>('/', {
-      params: { i: imdbId },
-    });
-    const data = (await firstValueFrom(observableResponse)).data;
+    const data = await this.fetchOMDbMovieData(imdbId);
 
     if (data.Response === 'False') throw new Error(data.Error);
 
-    const createMovieDto = this.mapper.map(
-      data,
-      GetMovieDtoSuccess,
-      CreateMovieDto,
-    );
+    const createMovieDto = this.mapper.map(data, OMDbMovieDto, CreateMovieDto);
 
     return this.create(createMovieDto).catch();
+  }
+
+  private async fetchIMDbRating(imdbId: string) {
+    const data = await this.fetchOMDbMovieData(imdbId);
+
+    if (data.Response === 'False') return 'N/A';
+    return data.imdbRating;
+  }
+
+  async searchByTitle(title: string, page = 1) {
+    const searchMovieObservableResponse =
+      this.httpService.get<SearchMovieResponseDto>('/', {
+        params: { s: title, type: 'movie', page },
+      });
+
+    const { data } = await firstValueFrom(searchMovieObservableResponse);
+
+    if (data.Response === 'False') {
+      return {
+        movies: [],
+        totalResults: 0,
+        totalPages: 0,
+        page: 0,
+      };
+    }
+
+    const transformMovieDto = (OMDbMovie: OMDbMovieDto) =>
+      this.mapper.map(OMDbMovie, OMDbMovieDto, CreateMovieDto);
+
+    const setRating = async (
+      movie: CreateMovieDto,
+    ): Promise<CreateMovieDto> => ({
+      ...movie,
+      imdbRating: await this.fetchIMDbRating(movie.imdbID),
+    });
+
+    const convertAndSetRating = (OMDbMovie: OMDbMovieDto) =>
+      setRating(transformMovieDto(OMDbMovie));
+
+    const movies = await Promise.all(data.Search.map(convertAndSetRating));
+
+    return {
+      movies,
+      totalResults: parseInt(data.totalResults),
+      totalPages: Math.ceil(parseInt(data.totalResults) / 10),
+      page,
+    };
   }
 }

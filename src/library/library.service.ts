@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoviesService } from 'src/movies/movies.service';
 import { Repository } from 'typeorm';
+import { MoviesService } from 'src/movies/movies.service';
 import { LibraryEntry } from './entities/library.entity';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class LibraryService {
   }
 
   async addOMDbMovieToUserLibrary(movieImdbId: string, userId: number) {
-    const movie = await this.moviesService.importMovieFromOMDb(movieImdbId);
+    const movie = await this.moviesService.imporFromOMDb(movieImdbId);
     if (!movie) {
       throw new Error(`Movie with imdbID = ${movieImdbId} not found.`);
     }

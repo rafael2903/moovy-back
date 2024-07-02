@@ -1,5 +1,5 @@
 import { AutoMap } from '@automapper/classes';
-import { IsNotEmpty, IsNumberString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumberString } from 'class-validator';
 
 export class CreateMovieDto {
   @AutoMap()
@@ -19,6 +19,6 @@ export class CreateMovieDto {
   imdbRating!: string;
 
   @AutoMap()
-  @IsUrl()
+  @IsNotEmpty()
   poster!: string;
 }

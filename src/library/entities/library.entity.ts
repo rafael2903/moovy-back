@@ -1,6 +1,6 @@
+import { CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Movie } from 'src/movies/entities/movie.entity';
 import { User } from 'src/users/entities/user.entity';
-import { CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class LibraryEntry {
@@ -13,9 +13,9 @@ export class LibraryEntry {
   @CreateDateColumn()
   createdDate!: Date;
 
-  @ManyToOne(() => Movie, (movie) => movie.libraries)
+  @ManyToOne(() => Movie, (movie) => movie.libraries, { onDelete: 'CASCADE' })
   movie!: Movie;
 
-  @ManyToOne(() => User, (user) => user.library)
+  @ManyToOne(() => User, (user) => user.library, { onDelete: 'CASCADE' })
   user!: User;
 }

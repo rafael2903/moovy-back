@@ -3,19 +3,23 @@ import {
   Controller,
   Delete,
   Get,
-  // Patch,
   HttpException,
   HttpStatus,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
-// import { UpdateMovieDto } from './dto/update-movie.dto';
 import { MoviesService } from './movies.service';
 
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
+
+  @Get('search')
+  search(@Query('title') title: string, @Query('page') page: number) {
+    return this.moviesService.searchByTitle(title, page);
+  }
 
   @Post()
   create(@Body() createMovieDto: CreateMovieDto) {
@@ -41,11 +45,6 @@ export class MoviesController {
       );
     }
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: number, @Body() updateMovieDto: UpdateMovieDto) {
-  //   return this.moviesService.update(id, updateMovieDto);
-  // }
 
   @Delete(':id')
   remove(@Param('id') id: number) {

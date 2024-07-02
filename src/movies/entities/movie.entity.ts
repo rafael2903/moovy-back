@@ -12,10 +12,10 @@ export class Movie {
   @Column()
   title!: string;
 
-  @Column()
+  @Column({ length: 4 })
   year!: string;
 
-  @Column({ length: 7 })
+  @Column({ length: 3 })
   imdbRating!: string;
 
   @Column()

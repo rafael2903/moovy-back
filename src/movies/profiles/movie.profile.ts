@@ -2,7 +2,7 @@ import { createMap, forMember, mapFrom, type Mapper } from '@automapper/core';
 import { AutomapperProfile, InjectMapper } from '@automapper/nestjs';
 import { Injectable } from '@nestjs/common';
 import { CreateMovieDto } from '../dto/create-movie.dto';
-import { GetMovieDtoSuccess } from '../dto/get-movie.dto';
+import { OMDbMovieDto } from '../dto/OMDb-movie.dto';
 
 @Injectable()
 export class MovieProfile extends AutomapperProfile {
@@ -14,7 +14,7 @@ export class MovieProfile extends AutomapperProfile {
     return (mapper: Mapper) => {
       createMap(
         mapper,
-        GetMovieDtoSuccess,
+        OMDbMovieDto,
         CreateMovieDto,
         forMember(
           (d) => d.title,
