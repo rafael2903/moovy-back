@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -21,10 +22,11 @@ export class AuthService {
     if (!user || !isMatch) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: user.id, email: user.email };
+    const accessToken = await this.getToken(user);
 
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      user,
+      accessToken,
     };
   }
 
@@ -36,6 +38,17 @@ export class AuthService {
       password: hash,
     };
 
-    return this.usersService.create(data);
+    const user = await this.usersService.create(data);
+    const accessToken = await this.getToken(user);
+
+    return {
+      user,
+      accessToken,
+    };
+  }
+
+  private async getToken(user: User) {
+    const payload = { sub: user.id, email: user.email };
+    return await this.jwtService.signAsync(payload);
   }
 }
