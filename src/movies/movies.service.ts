@@ -1,13 +1,15 @@
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
+import { LibraryService } from 'src/library/library.service';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { GetMovieResponseDto } from './dto/get-movie-response.dto';
 import { OMDbMovieDto } from './dto/OMDb-movie.dto';
+import { ResponseMovieDto } from './dto/response-movie.dto';
 import { SearchMovieResponseDto } from './dto/search-movie-response.dto';
 import { Movie } from './entities/movie.entity';
 
@@ -17,6 +19,8 @@ export class MoviesService {
     @InjectRepository(Movie)
     private moviesRepository: Repository<Movie>,
     private readonly httpService: HttpService,
+    @Inject(forwardRef(() => LibraryService))
+    private libraryService: LibraryService,
     @InjectMapper() private readonly mapper: Mapper,
   ) {}
 
@@ -90,7 +94,7 @@ export class MoviesService {
     return data.imdbRating;
   }
 
-  async searchByTitle(title: string, page = 1) {
+  async searchByTitle(title: string, page: number, userId: number) {
     const searchMovieObservableResponse =
       this.httpService.get<SearchMovieResponseDto>('/', {
         params: { s: title, type: 'movie', page },
@@ -117,16 +121,33 @@ export class MoviesService {
       imdbRating: await this.fetchIMDbRating(movie.imdbID),
     });
 
-    const convertAndSetRating = (OMDbMovie: OMDbMovieDto) =>
-      setRating(transformMovieDto(OMDbMovie));
+    const setWatched = async (
+      movieData: Promise<CreateMovieDto>,
+    ): Promise<ResponseMovieDto> => {
+      const { imdbID } = await movieData;
+      let watched = false;
+      const movie = await this.findOneByImdbID(imdbID);
 
-    const movies = await Promise.all(data.Search.map(convertAndSetRating));
+      if (movie) {
+        watched = await this.libraryService.isInUserLibrary(movie.id, userId);
+      }
+
+      return {
+        ...(await movieData),
+        watched,
+      };
+    };
+
+    const convertAndSetAttributes = (OMDbMovie: OMDbMovieDto) =>
+      setWatched(setRating(transformMovieDto(OMDbMovie)));
+
+    const movies = await Promise.all(data.Search.map(convertAndSetAttributes));
 
     return {
       movies,
       totalResults: parseInt(data.totalResults),
       totalPages: Math.ceil(parseInt(data.totalResults) / 10),
-      page,
+      page: +page,
     };
   }
 }

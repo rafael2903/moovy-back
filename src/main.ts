@@ -8,7 +8,7 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
-  app.enableCors({ credentials: true, origin: 'http://localhost' });
+  app.enableCors({ credentials: true, origin: 'http://localhost:5173' });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.use(cookieParser());
 

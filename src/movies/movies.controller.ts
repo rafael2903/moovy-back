@@ -8,17 +8,23 @@ import {
   Param,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { MoviesService } from './movies.service';
+import { Request } from 'express';
 
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
   @Get('search')
-  search(@Query('title') title: string, @Query('page') page: number) {
-    return this.moviesService.searchByTitle(title, page);
+  search(
+    @Req() req: Request,
+    @Query('title') title: string,
+    @Query('page') page: string,
+  ) {
+    return this.moviesService.searchByTitle(title, +page || 1, req['user'].sub);
   }
 
   @Post()

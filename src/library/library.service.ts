@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MoviesService } from 'src/movies/movies.service';
@@ -9,6 +9,7 @@ export class LibraryService {
   constructor(
     @InjectRepository(LibraryEntry)
     private libraryEntryRepository: Repository<LibraryEntry>,
+    @Inject(forwardRef(() => MoviesService))
     private readonly moviesService: MoviesService,
   ) {}
 
@@ -39,6 +40,13 @@ export class LibraryService {
     return this.libraryEntryRepository.find({
       where: { userId },
       relations: ['movie'],
+    });
+  }
+
+  isInUserLibrary(movieId: number, userId: number) {
+    return this.libraryEntryRepository.existsBy({
+      movieId,
+      userId,
     });
   }
 }
