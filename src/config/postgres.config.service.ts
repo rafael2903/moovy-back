@@ -17,6 +17,10 @@ export class PostgresConfigService implements TypeOrmOptionsFactory {
       entities: [join(__dirname, '**', '*.entity.{ts,js}')],
       synchronize: true,
       autoLoadEntities: true,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     };
   }
 }
