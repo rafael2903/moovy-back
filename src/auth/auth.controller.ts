@@ -56,7 +56,7 @@ export class AuthController {
     const expiresDate = new Date(Date.now() + ms('1d'));
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      // secure: true,
+      secure: true,
       sameSite: 'strict',
       expires: expiresDate,
     });
